@@ -1,0 +1,22 @@
+// app/auth/suspended/page.tsx
+import Link from 'next/link'
+
+export default function SuspendedPage() {
+  return (
+    <div className="min-h-screen bg-liturgical-white flex items-center justify-center px-4">
+      <div className="w-full max-w-md text-center bg-white rounded-card border border-red-200 shadow-card p-10">
+        <div className="text-5xl mb-4">🔒</div>
+        <h1 className="font-display text-2xl font-bold text-navy-950 mb-2">Account Suspended</h1>
+        <p className="text-slate-600 mb-6">
+          Your account has been suspended or deactivated. Please contact the ICT Department to resolve this.
+        </p>
+        <div className="text-sm text-slate-500 mb-6 space-y-1">
+          <p>📧 <a href="mailto:ict@dioceseofkalookan.org" className="text-gold-600 hover:underline">ict@dioceseofkalookan.org</a></p>
+        </div>
+        <Link href="/auth/login" className="text-sm text-navy-950 hover:text-gold-600 underline">
+          Back to Sign In
+        </Link>
+      </div>
+    </div>
+  )
+}
