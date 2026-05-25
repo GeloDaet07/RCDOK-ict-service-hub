@@ -12,8 +12,10 @@ export const metadata = { title: 'All Tickets' }
 export default async function AdminTicketsPage({
   searchParams,
 }: {
-  searchParams: { status?: string; priority?: string; category?: string; assigned?: string; q?: string }
+  searchParams: Promise<{ status?: string; priority?: string; category?: string; assigned?: string; q?: string }>
 }) {
+  const params = await searchParams
+
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -30,11 +32,11 @@ export default async function AdminTicketsPage({
     .select('id, ticket_number, title, category, status, priority, created_at, assigned_to, requester_id')
     .order('created_at', { ascending: false })
 
-  if (searchParams.status)   query = query.eq('status', searchParams.status)
-  if (searchParams.priority) query = query.eq('priority', searchParams.priority)
-  if (searchParams.category) query = query.eq('category', searchParams.category)
-  if (searchParams.assigned === 'none') query = query.is('assigned_to', null)
-  if (searchParams.q) query = query.ilike('title', `%${searchParams.q}%`)
+  if (params.status)   query = query.eq('status', params.status)
+  if (params.priority) query = query.eq('priority', params.priority)
+  if (params.category) query = query.eq('category', params.category)
+  if (params.assigned === 'none') query = query.is('assigned_to', null)
+  if (params.q) query = query.ilike('title', `%${params.q}%`)
 
   const { data: ticketsData } = await query.limit(100)
   const tickets = (ticketsData || []) as Ticket[]
@@ -57,8 +59,8 @@ export default async function AdminTicketsPage({
   }
 
   const activeFilters = [
-    searchParams.status, searchParams.priority,
-    searchParams.category, searchParams.assigned, searchParams.q,
+    params.status, params.priority,
+    params.category, params.assigned, params.q,
   ].filter(Boolean).length
 
   return (
@@ -78,23 +80,23 @@ export default async function AdminTicketsPage({
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <input
               name="q"
-              defaultValue={searchParams.q}
+              defaultValue={params.q}
               placeholder="Search title..."
               className="col-span-2 h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
             />
-            <select name="status" defaultValue={searchParams.status || ''} className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+            <select name="status" defaultValue={params.status || ''} className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
               <option value="">All Statuses</option>
               {(Object.entries(TICKET_STATUS_LABELS) as [TicketStatus, string][]).map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>
               ))}
             </select>
-            <select name="priority" defaultValue={searchParams.priority || ''} className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+            <select name="priority" defaultValue={params.priority || ''} className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
               <option value="">All Priorities</option>
               {(Object.entries(TICKET_PRIORITY_LABELS) as [TicketPriority, string][]).map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>
               ))}
             </select>
-            <select name="category" defaultValue={searchParams.category || ''} className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+            <select name="category" defaultValue={params.category || ''} className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
               <option value="">All Categories</option>
               {(Object.entries(SERVICE_CATEGORY_LABELS) as [ServiceCategory, string][]).map(([v, l]) => (
                 <option key={v} value={v}>{l}</option>

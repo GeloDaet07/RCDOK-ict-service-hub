@@ -25,8 +25,11 @@ const ROLE_LABELS: Record<UserRole, string> = {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: { role?: string; q?: string }
+  searchParams: Promise<{ role?: string; q?: string }>
+  
 }) {
+  const params = await searchParams
+
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -40,8 +43,8 @@ export default async function AdminUsersPage({
   // Fetch users — use admin client to bypass RLS
   const adminClient = createSupabaseAdminClient()
   let query = adminClient.from('profiles').select('*').order('created_at', { ascending: false })
-  if (searchParams.role) query = query.eq('role', searchParams.role)
-  if (searchParams.q)    query = query.ilike('full_name', `%${searchParams.q}%`)
+  if (params.role) query = query.eq('role', params.role)
+  if (params.q)    query = query.ilike('full_name', `%${params.q}%`)
 
   const { data: usersData } = await query
   const users = (usersData || []) as Profile[]
@@ -68,11 +71,11 @@ export default async function AdminUsersPage({
         {/* Role filter tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { label: `All (${counts.all})`,               href: '/admin/users',                  active: !searchParams.role },
-            { label: `Requesters (${counts.requester})`,  href: '/admin/users?role=requester',   active: searchParams.role === 'requester' },
-            { label: `ICT Staff (${counts.ict_staff})`,   href: '/admin/users?role=ict_staff',   active: searchParams.role === 'ict_staff' },
-            { label: `Admins (${counts.ict_admin})`,      href: '/admin/users?role=ict_admin',   active: searchParams.role === 'ict_admin' },
-            { label: `Suspended (${counts.suspended})`,   href: '/admin/users?suspended=true',   active: searchParams.role === 'suspended' },
+            { label: `All (${counts.all})`,               href: '/admin/users',                  active: !params.role },
+            { label: `Requesters (${counts.requester})`,  href: '/admin/users?role=requester',   active: params.role === 'requester' },
+            { label: `ICT Staff (${counts.ict_staff})`,   href: '/admin/users?role=ict_staff',   active: params.role === 'ict_staff' },
+            { label: `Admins (${counts.ict_admin})`,      href: '/admin/users?role=ict_admin',   active: params.role === 'ict_admin' },
+            { label: `Suspended (${counts.suspended})`,   href: '/admin/users?suspended=true',   active: params.role === 'suspended' },
           ].map((tab) => (
             <Link key={tab.href} href={tab.href}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${tab.active ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}>
@@ -85,12 +88,12 @@ export default async function AdminUsersPage({
         <form method="GET" className="mb-4 flex gap-2">
           <input
             name="q"
-            defaultValue={searchParams.q}
+            defaultValue={params.q}
             placeholder="Search by name..."
             className="h-10 px-3 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 flex-1 max-w-xs bg-white"
           />
           <button type="submit" className="h-10 px-4 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors">Search</button>
-          {searchParams.q && <Link href="/admin/users" className="h-10 px-4 flex items-center bg-white border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50">Clear</Link>}
+          {params.q && <Link href="/admin/users" className="h-10 px-4 flex items-center bg-white border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50">Clear</Link>}
         </form>
 
         {/* Users table */}
