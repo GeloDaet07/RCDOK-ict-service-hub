@@ -122,7 +122,8 @@ CREATE TABLE tickets (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Ticket number generator function
+CREATE SEQUENCE IF NOT EXISTS ticket_number_seq;
+
 CREATE OR REPLACE FUNCTION generate_ticket_number()
 RETURNS TEXT AS $$
 DECLARE
@@ -131,7 +132,9 @@ DECLARE
   year   TEXT;
 BEGIN
   year := TO_CHAR(NOW(), 'YY');
-  SELECT COUNT(*) + 1 INTO seq FROM tickets WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM NOW());
+  
+  seq := nextval('ticket_number_seq'); 
+  
   prefix := 'TKT-' || year || '-';
   RETURN prefix || LPAD(seq::TEXT, 5, '0');
 END;
