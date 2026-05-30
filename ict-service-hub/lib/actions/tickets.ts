@@ -105,7 +105,8 @@ export async function createTicket(
 
     // ── Notification (non-blocking, safe to fail)
     try {
-      await supabase.from('notifications').insert({
+      const notifAdminClient = createSupabaseAdminClient()
+      await notifAdminClient.from('notifications').insert({
         user_id:   user.id,
         ticket_id: ticket.id,
         type:      'ticket_created' as const,
@@ -330,7 +331,7 @@ export async function addComment(
     // Notify the requester when ICT staff posts a public (non-internal) comment
     const isStaff = ['ict_staff', 'ict_admin', 'super_admin'].includes(profile.role)
     const isPublicStaffComment = isStaff && !parsed.data.is_internal
-    const commentAuthorIsRequester = ticketForComment?.requester_id === session.user.id
+    const commentAuthorIsRequester = ticketForComment?.requester_id === user.id
 
     if (isPublicStaffComment && ticketForComment && !commentAuthorIsRequester) {
       const adminClient = createSupabaseAdminClient()

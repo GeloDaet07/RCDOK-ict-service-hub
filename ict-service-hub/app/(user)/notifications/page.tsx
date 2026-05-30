@@ -15,7 +15,7 @@ async function markOneAsRead(formData: FormData) {
   'use server'
   const id = formData.get('id') as string
   const supabase = await createSupabaseServerClient()
-  await supabase.from('notifications').update({ is_read: true }).eq('id', id)
+  await supabase.from('notifications').update({ is_read: true } as never).eq('id', id)
   revalidatePath('/notifications')
 }
 
@@ -25,7 +25,7 @@ async function markAllAsRead(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   await supabase
     .from('notifications')
-    .update({ is_read: true })
+    .update({ is_read: true } as never)
     .eq('user_id', userId)
     .eq('is_read', false)
   revalidatePath('/notifications')
@@ -38,7 +38,7 @@ async function viewTicket(formData: FormData) {
   const supabase = await createSupabaseServerClient()
   await supabase
     .from('notifications')
-    .update({ is_read: true })
+    .update({ is_read: true } as never)
     .eq('ticket_id', ticketId)
     .eq('user_id', userId)
     .eq('is_read', false)
@@ -62,17 +62,15 @@ function formatRelativeTime(isoString: string): string {
   return date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
 }
 
-// Keyed to the exact `type` values inserted in lib/actions/tickets.ts:
-//   createTicket  → 'ticket_created'
-//   updateTicket  → 'status_changed'  (when status changes)
-// addComment creates no notification — Comments tab is therefore not shown.
 const TYPE_META: Record<string, { icon: string; dotColor: string; labelColor: string }> = {
   ticket_created:  { icon: '📋', dotColor: 'bg-blue-400',    labelColor: 'text-blue-700'    },
+  ticket_updated:  { icon: '🔄', dotColor: 'bg-gold-500',    labelColor: 'text-gold-700'    },
   status_changed:  { icon: '🔄', dotColor: 'bg-gold-500',    labelColor: 'text-gold-700'    },
   ticket_assigned: { icon: '👤', dotColor: 'bg-violet-400',  labelColor: 'text-violet-700'  },
   ticket_resolved: { icon: '✅', dotColor: 'bg-emerald-400', labelColor: 'text-emerald-700' },
   ticket_closed:   { icon: '🔒', dotColor: 'bg-slate-400',   labelColor: 'text-slate-600'   },
   ticket_reopened: { icon: '🔓', dotColor: 'bg-rose-400',    labelColor: 'text-rose-700'    },
+  comment_added:   { icon: '💬', dotColor: 'bg-sky-400',     labelColor: 'text-sky-700'     },
 }
 const FALLBACK_META = { icon: '🔔', dotColor: 'bg-slate-400', labelColor: 'text-navy-950' }
 
