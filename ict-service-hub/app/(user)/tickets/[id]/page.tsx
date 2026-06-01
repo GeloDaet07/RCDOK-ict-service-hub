@@ -61,13 +61,11 @@ export default async function TicketDetailPage({
     assignee: { full_name: string } | null
   }
 
-  const { data: notifsData, count: unreadCount } = await supabase
+  const { count: unreadCount } = await supabase
     .from('notifications')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .eq('is_read', false)
-    .order('created_at', { ascending: false })
-    .limit(5)
 
   return (
     <div className="min-h-screen bg-liturgical-white">

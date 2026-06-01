@@ -15,6 +15,7 @@ async function markOneAsRead(formData: FormData) {
   'use server'
   const id = formData.get('id') as string
   const supabase = await createSupabaseServerClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase.from('notifications') as any).update({ is_read: true }).eq('id', id)
   revalidatePath('/notifications')
 }
@@ -23,6 +24,7 @@ async function markAllAsRead(formData: FormData) {
   'use server'
   const userId = formData.get('userId') as string
   const supabase = await createSupabaseServerClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase.from('notifications') as any)
     .update({ is_read: true })
     .eq('user_id', userId)
@@ -35,6 +37,7 @@ async function viewTicket(formData: FormData) {
   const ticketId = formData.get('ticketId') as string
   const userId   = formData.get('userId')   as string
   const supabase = await createSupabaseServerClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase.from('notifications') as any)
     .update({ is_read: true })
     .eq('ticket_id', ticketId)
@@ -97,6 +100,7 @@ export default async function NotificationsPage({
   const profile = profileData as Profile | null
   if (!profile) redirect('/auth/login')
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: notifsData } = await (supabase.from('notifications') as any)
     .select('*')
     .eq('user_id', user.id)
