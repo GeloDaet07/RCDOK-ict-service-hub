@@ -1,6 +1,7 @@
 // lib/supabase/server.ts
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
@@ -21,7 +22,7 @@ export async function createSupabaseServerClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server Component — read-only cookies, safe to ignore
+            // Server Component - read-only cookies, safe to ignore
           }
         },
       },
@@ -30,14 +31,14 @@ export async function createSupabaseServerClient() {
 }
 
 export function createSupabaseAdminClient() {
-  // Dynamic import avoids bundling the service role key on the client
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { createClient } = require('@supabase/supabase-js')
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-      auth: { autoRefreshToken: false, persistSession: false },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
     }
   )
 }

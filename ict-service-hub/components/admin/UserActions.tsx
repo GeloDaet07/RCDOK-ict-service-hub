@@ -12,7 +12,6 @@ interface Props {
 
 export function AdminUserActions({ userId, currentRole, isSuspended, currentUserRole }: Props) {
   const [loading, setLoading] = useState(false)
-  const [done,    setDone]    = useState(false)
 
   const canChangeRole    = ['ict_admin', 'super_admin'].includes(currentUserRole)
   const canSuspend       = ['ict_admin', 'super_admin'].includes(currentUserRole)
@@ -28,7 +27,6 @@ export function AdminUserActions({ userId, currentRole, isSuspended, currentUser
       body: JSON.stringify({ userId, role: newRole }),
     })
     setLoading(false)
-    setDone(true)
     window.location.reload()
   }
 
