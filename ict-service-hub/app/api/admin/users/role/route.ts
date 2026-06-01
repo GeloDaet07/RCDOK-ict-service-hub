@@ -24,10 +24,12 @@ export async function POST(req: Request) {
   }
 
   const adminClient = createSupabaseAdminClient()
-  const { error } = await adminClient.from('profiles').update({ role }).eq('id', userId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (adminClient.from('profiles') as any).update({ role }).eq('id', userId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  await adminClient.from('audit_logs').insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (adminClient.from('audit_logs') as any).insert({
     actor_id:    user.id,
     actor_email: user.email,
     action:      'user_role_changed' as const,

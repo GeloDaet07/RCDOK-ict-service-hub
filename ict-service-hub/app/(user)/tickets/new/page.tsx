@@ -1,7 +1,6 @@
 // app/(user)/tickets/new/page.tsx
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { TicketSubmitForm } from '@/components/tickets/TicketSubmitForm'
 import { PageHeader } from '@/components/ui'
 import { Profile } from '@/types/database'
@@ -23,13 +22,11 @@ export default async function NewTicketPage() {
   const profile = profileData as Profile | null
       if (!profile) redirect('/auth/login')
 
-  const { data: notifsData, count: unreadCount } = await supabase
+  const { count: unreadCount } = await supabase
     .from('notifications')
-    .select('*', { count: 'exact' })
+    .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .eq('is_read', false)
-    .order('created_at', { ascending: false })
-    .limit(5)
 
   return (
     <div className="min-h-screen bg-liturgical-white">

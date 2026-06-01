@@ -15,22 +15,22 @@ export async function POST(req: Request) {
   }
 
   const { userId, suspend } = await req.json() as { userId: string; suspend: boolean }
-
   const adminClient = createSupabaseAdminClient()
-  const { error } = await adminClient
-    .from('profiles')
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (adminClient.from('profiles') as any)
     .update({ is_suspended: suspend, suspension_reason: suspend ? 'Suspended by admin' : null })
     .eq('id', userId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  await adminClient.from('audit_logs').insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (adminClient.from('audit_logs') as any).insert({
     actor_id:    user.id,
     actor_email: user.email,
-    action:      'user_suspended' as const,
+    action:      suspend ? 'user_suspended' : 'user_reactivated',
     resource:    'user',
     resource_id: userId,
-    new_values:  { is_suspended: suspend },
   })
 
   return NextResponse.json({ success: true })

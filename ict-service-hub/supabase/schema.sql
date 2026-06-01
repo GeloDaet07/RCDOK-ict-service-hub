@@ -314,7 +314,12 @@ RETURNS TRIGGER AS $$
 BEGIN
   IF OLD.status IS DISTINCT FROM NEW.status THEN
     INSERT INTO ticket_status_history (ticket_id, changed_by, old_status, new_status)
-    VALUES (NEW.id, NEW.assigned_to, OLD.status, NEW.status);
+    VALUES (
+      NEW.id, 
+      COALESCE(auth.uid(), NEW.assigned_to, NEW.requester_id), 
+      OLD.status, 
+      NEW.status
+    );
   END IF;
   RETURN NEW;
 END;

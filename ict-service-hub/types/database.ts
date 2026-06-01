@@ -1,5 +1,13 @@
 // types/database.ts
 
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type UserRole = 'requester' | 'ict_staff' | 'ict_admin' | 'super_admin'
 export type TicketStatus = 'pending' | 'open' | 'in_progress' | 'on_hold' | 'resolved' | 'closed' | 'cancelled'
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
@@ -80,8 +88,8 @@ export interface AuditLog {
   action: AuditAction
   resource: string | null
   resource_id: string | null
-  old_values: Record<string, unknown> | null
-  new_values: Record<string, unknown> | null
+  old_values: Json | null
+  new_values: Json | null
   ip_address: string | null
   user_agent: string | null
   created_at: string
@@ -99,8 +107,6 @@ export interface UsageSnapshot {
 }
 
 // ── Supabase Database type map ──────────────────────────────────────────────
-// Each table needs Row / Insert / Update shapes.
-// Using explicit types (not Partial<>) so Supabase client infers columns correctly.
 
 export type Database = {
   public: {
@@ -232,8 +238,8 @@ export type Database = {
           action: AuditAction
           resource?: string | null
           resource_id?: string | null
-          old_values?: Record<string, unknown> | null
-          new_values?: Record<string, unknown> | null
+          old_values?: Json | null
+          new_values?: Json | null
           ip_address?: string | null
           user_agent?: string | null
           created_at?: string
@@ -282,11 +288,13 @@ export type Database = {
         Update: Record<string, never>
       }
     }
+    Views: Record<string, never>
     Functions: {
       is_ict_staff_or_above: { Args: Record<never, never>; Returns: boolean }
       is_ict_admin_or_above: { Args: Record<never, never>; Returns: boolean }
     }
     Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 
