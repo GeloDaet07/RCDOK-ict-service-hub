@@ -1,4 +1,4 @@
-// proxy.ts
+// middleware.ts
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
@@ -58,9 +58,9 @@ function pruneRateLimitStore() {
   }
 }
 
-// ── proxy ───────────────────────────────────────────────────────────────
+// ── middleware ───────────────────────────────────────────────────────────────
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   try {
     const { pathname, searchParams } = request.nextUrl
 
@@ -68,7 +68,7 @@ export async function proxy(request: NextRequest) {
 
     const isPrefetch =
       request.headers.get('purpose') === 'prefetch' ||
-      request.headers.get('x-proxy-prefetch') === '1' ||
+      request.headers.get('x-middleware-prefetch') === '1' ||
       request.headers.has('next-router-prefetch')
 
     const isRSC = request.headers.has('rsc')
@@ -233,7 +233,7 @@ export async function proxy(request: NextRequest) {
 
     return supabaseResponse
   } catch (err) {
-    console.error('proxy Critical Error:', err)
+    console.error('middleware Critical Error:', err)
     return NextResponse.next({ request })
   }
 }

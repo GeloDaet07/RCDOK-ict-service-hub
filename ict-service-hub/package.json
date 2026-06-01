@@ -12,6 +12,7 @@
     "db:types": "supabase gen types typescript --local > types/supabase-generated.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.2",
     "next": "^16.2.6",
