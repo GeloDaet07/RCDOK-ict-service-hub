@@ -128,16 +128,23 @@ export async function createTicket(
       console.error('[createTicket] Audit log error:', auditErr)
     }
 
-    sendTicketNotification({
-      type:           'ticket_created',
-      recipientEmail: user.email!,
-      recipientName:  profile.full_name,
-      ticketNumber:   ticket.ticket_number!,
-      ticketTitle:    parsed.data.title,
-      category:       parsed.data.category,
-    }).catch((emailErr) => console.error('[createTicket] Email error:', emailErr))
+    // Immune Resend Try/Catch Block
+    try {
+      await sendTicketNotification({
+        type:           'ticket_created',
+        recipientEmail: user.email!,
+        recipientName:  profile.full_name,
+        ticketNumber:   ticket.ticket_number!,
+        ticketTitle:    parsed.data.title,
+        category:       parsed.data.category,
+      })
+    } catch (emailErr) {
+      console.error('⚠️ [createTicket] Resend restriction/error blocked outbound message, but ticket was successfully saved:', emailErr)
+    }
 
-    revalidatePath('/tickets')
+    // ⚠️ TEMPORARY TWEAK: Commented out to isolate the Server Component background render error
+    // revalidatePath('/tickets')
+    
     return { success: true, data: { ticketId: ticket.id, ticketNumber: ticket.ticket_number! } }
 
   } catch (err) {
