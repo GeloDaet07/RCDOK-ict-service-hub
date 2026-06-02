@@ -7,7 +7,8 @@ import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/sup
 import { createTicketSchema, updateTicketSchema, createCommentSchema } from '@/lib/validations/schemas'
 import type { CreateTicketInput, UpdateTicketInput, CreateCommentInput } from '@/lib/validations/schemas'
 import type { Profile, Ticket, NotificationType } from '@/types/database'
-import { sendTicketNotification } from '@/lib/email/resend'
+
+// 🚧 REMOVED THE RESEND IMPORT ROUTINE TO PREVENT GLOBAL SERVER CONTEXT CRASHES
 
 type ActionResult<T = void> =
   | { success: true; data?: T; message?: string }
@@ -128,22 +129,10 @@ export async function createTicket(
       console.error('[createTicket] Audit log error:', auditErr)
     }
 
-    // Immune Resend Try/Catch Block
-    try {
-      await sendTicketNotification({
-        type:           'ticket_created',
-        recipientEmail: user.email!,
-        recipientName:  profile.full_name,
-        ticketNumber:   ticket.ticket_number!,
-        ticketTitle:    parsed.data.title,
-        category:       parsed.data.category,
-      })
-    } catch (emailErr) {
-      console.error('⚠️ [createTicket] Resend restriction/error blocked outbound message, but ticket was successfully saved:', emailErr)
-    }
+    // 📬 RESEND EMAIL DISPATCH SYSTEM HAS BEEN DECOMMISSIONED & COMPLETELY BYPASSED CLEARLY HERE
 
-    // ⚠️ TEMPORARY TWEAK: Commented out to isolate the Server Component background render error
-    // revalidatePath('/tickets')
+    // Safely restored cache updates since top-level runtime dependency conflicts are cleared out
+    revalidatePath('/tickets')
     
     return { success: true, data: { ticketId: ticket.id, ticketNumber: ticket.ticket_number! } }
 
