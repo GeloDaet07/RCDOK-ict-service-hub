@@ -1,10 +1,11 @@
 // app/(user)/tickets/[id]/page.tsx
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { StatusBadge, PriorityBadge, CategoryBadge, Alert, PageHeader } from '@/components/ui'
 import type { Ticket, Comment, Profile } from '@/types/database'
 import Navbar from '@/components/ui/navbar'
+import { UserCommentBox } from '@/components/user/UserCommentBox'
 
 export const metadata = { title: 'Ticket Details' }
 
@@ -47,14 +48,27 @@ export default async function TicketDetailPage({
   // Fetch non-internal comments only
   const { data: commentsData } = await supabase
     .from('comments')
-    .select('*, author:profiles!comments_author_id_fkey(full_name, role)')
+    .select('*')
     .eq('ticket_id', id)
     .eq('is_internal', false)
     .order('created_at', { ascending: true })
 
-  const commentList = (commentsData || []) as (Comment & {
-    author: { full_name: string; role: string } | null
-  })[]
+  const rawComments = (commentsData || []) as Comment[]
+
+  const adminClient = createSupabaseAdminClient()
+  const authorIds = [...new Set(rawComments.map((c) => c.author_id).filter(Boolean))]
+  const { data: authorData } = authorIds.length
+    ? await adminClient.from('profiles').select('id, full_name, role').in('id', authorIds)
+    : { data: [] }
+
+  const authorMap = Object.fromEntries(
+    (authorData || []).map((p: { id: string; full_name: string; role: string }) => [p.id, p])
+  )
+
+  const commentList = rawComments.map((c) => ({
+    ...c,
+    author: authorMap[c.author_id] ?? null,
+  })) as (Comment & { author: { full_name: string; role: string } | null })[]
 
   const t = ticket as Ticket & {
     requester: { full_name: string; email: string }
@@ -66,6 +80,9 @@ export default async function TicketDetailPage({
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .eq('is_read', false)
+
+  // Only allow comments on non-closed, non-resolved tickets
+  const canComment = !['closed', 'resolved'].includes(t.status)
 
   return (
     <div className="min-h-screen bg-liturgical-white">
@@ -128,7 +145,7 @@ export default async function TicketDetailPage({
 
             {/* Comments */}
             <div className="bg-white rounded-card border border-liturgical-muted shadow-card">
-              <div className="px-6 py-4 border-b">
+              <div className="px-6 py-4 border-b border-liturgical-muted">
                 <h3 className="font-semibold text-navy-950">Updates & Comments</h3>
               </div>
 
@@ -139,7 +156,6 @@ export default async function TicketDetailPage({
                   commentList.map((c) => (
                     <div key={c.id} className="px-6 py-4">
                       <div className="flex items-center gap-2 mb-1.5">
-                        {/* Safe null handling */}
                         <span className="text-sm font-semibold text-navy-950">
                           {c.author?.full_name ?? 'Unknown user'}
                         </span>
@@ -170,6 +186,19 @@ export default async function TicketDetailPage({
                   ))
                 )}
               </div>
+
+              {/* Comment box */}
+              {canComment ? (
+                <div className="px-6 py-5 border-t border-liturgical-muted">
+                  <UserCommentBox ticketId={t.id} />
+                </div>
+              ) : (
+                <div className="px-6 py-4 border-t border-liturgical-muted">
+                  <p className="text-xs text-slate-400 text-center italic">
+                    This ticket is {t.status} — comments are no longer accepted.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
