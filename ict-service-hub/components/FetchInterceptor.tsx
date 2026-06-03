@@ -29,12 +29,27 @@ export function FetchInterceptor() {
     }
 
     window.fetch = async function (...args) {
-      startProgress()
+      const requestInfo = args[0]
+      let url = ''
+
+      if (typeof requestInfo === 'string') {
+        url = requestInfo
+      } else if (requestInfo instanceof URL) {
+        url = requestInfo.toString()
+      } else if (requestInfo instanceof Request) {
+        url = requestInfo.url
+      }
+
+      const isNextInternal = url.includes('?_rsc=') || url.includes('.next/')
+      const isMyApi = url.includes('/api/') || url.includes(process.env.NEXT_PUBLIC_API_URL || '')
+      const shouldTrack = !isNextInternal && isMyApi
+
+      if (shouldTrack) startProgress()
+
       try {
-        const response = await originalFetch.apply(this, args)
-        return response
+        return await originalFetch.apply(this, args)
       } finally {
-        stopProgress()
+        if (shouldTrack) stopProgress()
       }
     }
 
