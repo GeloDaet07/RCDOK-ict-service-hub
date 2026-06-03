@@ -12,8 +12,7 @@ const sanitizedString = (min: number, max: number, label: string) =>
     .transform((val) =>
       val
         .trim()
-        .replace(/<[^>]*>/g, '') // strip HTML tags
-        .replace(/[<>"'&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;' }[c] || c))
+        .replace(/<[^>]*>/g, '')
     )
 
 const externalLinkSchema = z
