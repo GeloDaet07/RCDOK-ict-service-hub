@@ -9,6 +9,7 @@ import { loginSchema, type LoginInput } from '@/lib/validations/schemas'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Button, Field, Input, Alert } from '@/components/ui'
 import Link from 'next/link'
+import { hashPassword } from '@/lib/utility/crypto'
 
 function LoginForm() {
   const router = useRouter()
@@ -23,9 +24,10 @@ function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     setServerError(null)
     const supabase = createSupabaseBrowserClient()
+    const hashedPassword = await hashPassword(data.password)
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
-      password: data.password,
+      password: hashedPassword,
     })
 
     if (error) {

@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validations/schemas'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Button, Field, Input, Alert } from '@/components/ui'
+import { hashPassword } from '@/lib/utility/crypto'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -20,8 +21,9 @@ export default function ResetPasswordPage() {
   const onSubmit = async (data: ResetPasswordInput) => {
     setServerError(null)
     const supabase = createSupabaseBrowserClient()
+    const hashedPassword = await hashPassword(data.password)
 
-    const { error } = await supabase.auth.updateUser({ password: data.password })
+    const { error } = await supabase.auth.updateUser({ password: hashedPassword })
 
     if (error) {
       setServerError('Could not reset password. The link may have expired. Please request a new one.')

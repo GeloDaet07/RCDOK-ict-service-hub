@@ -8,6 +8,7 @@ import { signupSchema, type SignupInput } from '@/lib/validations/schemas'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Button, Field, Input, Alert } from '@/components/ui'
 import Link from 'next/link'
+import { hashPassword } from '@/lib/utility/crypto'
 
 export default function SignupPage() {
   const [done, setDone] = useState(false)
@@ -20,10 +21,11 @@ export default function SignupPage() {
   const onSubmit = async (data: SignupInput) => {
     setServerError(null)
     const supabase = createSupabaseBrowserClient()
+    const hashedPassword = await hashPassword(data.password)
 
     const { error } = await supabase.auth.signUp({
       email: data.email,
-      password: data.password,
+      password: hashedPassword,
       options: {
         data: {
           full_name: data.full_name,
