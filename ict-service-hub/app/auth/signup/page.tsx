@@ -10,6 +10,24 @@ import { Button, Field, Input, Alert } from '@/components/ui'
 import Link from 'next/link'
 import { hashPassword } from '@/lib/utility/crypto'
 
+// attempt retry
+async function signUpWithRetry(supabase: any, payload: any, attempts = 3) {
+  for (let i = 0; i < attempts; i++) {
+    const result = await supabase.auth.signUp(payload)
+
+    if (!result.error) return result
+
+    const isRetryable = 
+      result.error.status === 504 ||
+      result.error.message?.includes('Gateway') ||
+      result.error.name === 'AuthRetryableFetchError'
+    if (error.status !== 504 && !error.message?.includes('Gateway')) return { data, error }
+    await new Promise(r => setTimeout(r, 1500))
+  }
+  // last attempt
+  return await supabase.auth.signUp(payload) 
+}
+
 export default function SignupPage() {
   const [done, setDone] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -64,7 +82,7 @@ export default function SignupPage() {
       <div className="min-h-screen bg-liturgical-white flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center bg-white rounded-card border border-green-200 shadow-card p-10">
           <div className="text-5xl mb-4">📬</div>
-          <h2 className="font-display text-2xl font-bold text-navy-950 mb-2">Account Created!</h2>
+          <h2 className="font-display text-2xl font-bold text-navy-950 mb-2">Check Your Email</h2>
           <p className="text-slate-600 mb-6">
             Your account has been successfully created! You may now proceed to logging in your account.
           </p>
