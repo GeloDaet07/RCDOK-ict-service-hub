@@ -11,17 +11,17 @@ import Link from 'next/link'
 import { hashPassword } from '@/lib/utility/crypto'
 
 // attempt retry
-async function signUpWithRetry(supabase: any, payload: any, attempts = 3) {
+async function signUpWithRetry(supabase: any, payload: any, attempts = 2) {
   for (let i = 0; i < attempts; i++) {
+    console.log(`Signup attempt ${i + 1}/${attempts}`)
+    
     const result = await supabase.auth.signUp(payload)
 
-    if (!result.error) return result
+    if (!result.error) {
+      console.log('Signup successful')
+      return result
+    }
 
-    const isRetryable = 
-      result.error.status === 504 ||
-      result.error.message?.includes('Gateway') ||
-      result.error.name === 'AuthRetryableFetchError'
-    if (error.status !== 504 && !error.message?.includes('Gateway')) return { data, error }
     await new Promise(r => setTimeout(r, 1500))
   }
   // last attempt
@@ -68,6 +68,8 @@ export default function SignupPage() {
         setServerError('Too many signup attempts. Please wait a few minutes and try again.')
       } else if (error.status === 0 || error.message.includes('fetch')) {
         setServerError('Cannot connect to the server. Check your internet connection and that NEXT_PUBLIC_SUPABASE_URL is set correctly in .env.local.')
+      } else if (error.status === 504 || error.message?.includes('Gateway') || error.name === 'AuthRetryableFetchError') {
+          await signUpWithRetry(supabase, error, 1)
       } else {
         setServerError(`Signup failed: ${error.message}`)
       }
