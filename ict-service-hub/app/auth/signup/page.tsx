@@ -10,6 +10,24 @@ import { Button, Field, Input, Alert } from '@/components/ui'
 import Link from 'next/link'
 import { hashPassword } from '@/lib/utility/crypto'
 
+// attempt retry
+async function signUpWithRetry(supabase: any, payload: any, attempts = 2) {
+  for (let i = 0; i < attempts; i++) {
+    console.log(`Signup attempt ${i + 1}/${attempts}`)
+    
+    const result = await supabase.auth.signUp(payload)
+
+    if (!result.error) {
+      console.log('Signup successful')
+      return result
+    }
+
+    await new Promise(r => setTimeout(r, 1500))
+  }
+  // last attempt
+  return await supabase.auth.signUp(payload) 
+}
+
 export default function SignupPage() {
   const [done, setDone] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -50,6 +68,8 @@ export default function SignupPage() {
         setServerError('Too many signup attempts. Please wait a few minutes and try again.')
       } else if (error.status === 0 || error.message.includes('fetch')) {
         setServerError('Cannot connect to the server. Check your internet connection and that NEXT_PUBLIC_SUPABASE_URL is set correctly in .env.local.')
+      } else if (error.status === 504 || error.message?.includes('Gateway') || error.name === 'AuthRetryableFetchError') {
+          await signUpWithRetry(supabase, error, 1)
       } else {
         setServerError(`Signup failed: ${error.message}`)
       }
@@ -64,7 +84,7 @@ export default function SignupPage() {
       <div className="flex flex-grow items-center justify-center px-4 pt-24 pb-12">
         <div className="w-full max-w-md text-center bg-white rounded-card border border-green-200 shadow-card p-10">
           <div className="text-5xl mb-4">📬</div>
-          <h2 className="font-display text-2xl font-bold text-navy-950 mb-2">Check email</h2>
+          <h2 className="font-display text-2xl font-bold text-navy-950 mb-2">Check Your Email</h2>
           <p className="text-slate-600 mb-6">
             Your account has been successfully created. Please verify your email address to continue using this account.
           </p>
