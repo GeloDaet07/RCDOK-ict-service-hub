@@ -40,7 +40,6 @@ export default async function AdminUsersPage({
   if (!profile) redirect('/auth/login')
   if (!['ict_admin', 'super_admin'].includes(profile.role)) redirect('/admin')
 
-  // Fetch users — use admin client to bypass RLS
   const adminClient = createSupabaseAdminClient()
   let query = adminClient.from('profiles').select('*').order('created_at', { ascending: false })
   if (params.role) query = query.eq('role', params.role)

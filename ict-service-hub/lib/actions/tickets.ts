@@ -8,8 +8,6 @@ import { createTicketSchema, updateTicketSchema, createCommentSchema } from '@/l
 import type { CreateTicketInput, UpdateTicketInput, CreateCommentInput } from '@/lib/validations/schemas'
 import type { Profile, Ticket, NotificationType } from '@/types/database'
 
-// 🚧 REMOVED THE RESEND IMPORT ROUTINE TO PREVENT GLOBAL SERVER CONTEXT CRASHES
-
 type ActionResult<T = void> =
   | { success: true; data?: T; message?: string }
   | { success: false; error: string }

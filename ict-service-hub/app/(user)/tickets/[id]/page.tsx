@@ -29,7 +29,6 @@ export default async function TicketDetailPage({
   const profile = profileData as Profile | null
     if (!profile) redirect('/auth/login')
 
-  // Fetch ticket (RLS ensures user can only see their own)
   const { data: ticketData } = await supabase
     .from('tickets')
     .select(
@@ -45,7 +44,6 @@ export default async function TicketDetailPage({
   const ticket = ticketData as Ticket | null
   if (!ticket) notFound()
 
-  // Fetch non-internal comments only
   const { data: commentsData } = await supabase
     .from('comments')
     .select('*')
@@ -81,7 +79,6 @@ export default async function TicketDetailPage({
     .eq('user_id', user.id)
     .eq('is_read', false)
 
-  // Only allow comments on non-closed, non-resolved tickets
   const canComment = !['closed', 'resolved'].includes(t.status)
 
   return (

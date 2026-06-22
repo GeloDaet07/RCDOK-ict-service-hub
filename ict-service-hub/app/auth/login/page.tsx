@@ -97,7 +97,6 @@ function LoginForm() {
   )
 }
 
-// 2. Wrap the form in a Suspense boundary in the default export
 export default function LoginPage() {
   return (
     <div className="flex flex-grow items-center justify-center px-4">

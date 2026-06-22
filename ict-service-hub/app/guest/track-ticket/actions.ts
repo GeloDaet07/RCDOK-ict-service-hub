@@ -13,7 +13,6 @@ export async function addGuestComment(ticketNumber: string, body: string) {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-  // 1. Get the ticket details to verify it exists and is a guest ticket
   const { data: ticket, error: ticketError } = await supabase
     .from('tickets')
     .select('id, guest_name')
@@ -25,7 +24,6 @@ export async function addGuestComment(ticketNumber: string, body: string) {
     throw new Error('Invalid ticket or not a guest ticket.')
   }
 
-  // 2. Insert the comment
   const { error: commentError } = await supabase
     .from('comments')
     .insert([
