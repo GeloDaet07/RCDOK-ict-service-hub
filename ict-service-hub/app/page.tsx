@@ -96,13 +96,6 @@ export default async function RootPage() {
 
         {/* Feature Highlights */}
         <div className="mt-28 w-full max-w-5xl flex flex-col items-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
-          <h2 className="text-2xl md:text-3xl font-bold text-brand-900 tracking-tight mb-3 ">
-            What the ICT Service Hub Provides
-          </h2>
-          <p className="text-slate-600 max-w-xl mb-12 text-sm md:text-base leading-relaxed">
-            We offer a variety of support services to parishes, ministries, and offices across the Diocese of Kalookan, from infrastructure and system support to streaming and media services.
-          </p>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
             {[
               { icon: Server, title: "Infrastructure & Systems", desc: "Network support, software installation, and system maintenance." },
