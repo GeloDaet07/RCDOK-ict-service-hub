@@ -21,8 +21,6 @@ const ADMIN_ROLES = ['ict_staff', 'ict_admin', 'super_admin']
 
 // ── In-memory rate limiter ───────────────────────────────────────────────────
 
-// TEMPORARILY COMMENTED OUT FOR DEBUGGING
-/*
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
 
 function getRateLimitKey(req: NextRequest): string {
@@ -60,7 +58,6 @@ function pruneRateLimitStore() {
     if (now > entry.resetAt) rateLimitStore.delete(key)
   }
 }
-*/
 
 // ── middleware ───────────────────────────────────────────────────────────────
 
@@ -68,7 +65,7 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname, searchParams } = request.nextUrl
 
-    // if (Math.random() < 0.01) pruneRateLimitStore()
+    if (Math.random() < 0.01) pruneRateLimitStore()
 
     const isPrefetch =
       request.headers.get('purpose') === 'prefetch' ||
@@ -79,7 +76,6 @@ export async function middleware(request: NextRequest) {
     const isDataRequest = pathname.startsWith('/_next/data') || request.headers.has('x-nextjs-data')
     const isInternal = isPrefetch || isRSC || isDataRequest
 
-    /*
     if (!isInternal) {
       const isAuthRoute = pathname.startsWith('/auth')
       const rateLimitKey = getRateLimitKey(request)
@@ -106,7 +102,6 @@ export async function middleware(request: NextRequest) {
         )
       }
     }
-    */
 
     let supabaseResponse = NextResponse.next({
       request: {
@@ -186,8 +181,6 @@ export async function middleware(request: NextRequest) {
 
     // ── Handle Authenticated Users ────────────────────────────────────────────
     
-    // TEMPORARY TEST: Commented out profile fetching and RBAC to see if DB calls cause the 500 error on Vercel.
-    /*
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, is_active, is_suspended')
@@ -238,19 +231,6 @@ export async function middleware(request: NextRequest) {
       copyCookies(redirectRes)
       return redirectRes
     }
-    */
-    
-    // Fallback logic for when RBAC is commented out
-    if (isAuthPage && pathname !== '/auth/suspended') {
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/dashboard'
-      const redirectRes = NextResponse.redirect(redirectUrl)
-      copyCookies(redirectRes)
-      return redirectRes
-    }
-
-    // Mock role for now to prevent headers from crashing
-    const userRole = 'user'
 
     supabaseResponse.headers.set('x-user-id', user.id)
     supabaseResponse.headers.set('x-user-role', userRole)
