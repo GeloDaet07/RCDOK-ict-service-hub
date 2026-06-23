@@ -104,7 +104,9 @@ export async function middleware(request: NextRequest) {
     }
 
     let supabaseResponse = NextResponse.next({
-      request,
+      request: {
+        headers: request.headers,
+      },
     })
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -125,7 +127,9 @@ export async function middleware(request: NextRequest) {
           setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
             cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
             supabaseResponse = NextResponse.next({
-              request,
+              request: {
+                headers: request.headers,
+              },
             })
             cookiesToSet.forEach(({ name, value, options }) =>
               supabaseResponse.cookies.set(name, value, options)
@@ -235,7 +239,11 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   } catch (err) {
     console.error('middleware Critical Error:', err)
-    return NextResponse.next({ request })
+    return NextResponse.next({ 
+      request: {
+        headers: request.headers,
+      }
+    })
   }
 }
 
