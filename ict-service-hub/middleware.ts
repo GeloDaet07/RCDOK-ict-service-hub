@@ -21,6 +21,8 @@ const ADMIN_ROLES = ['ict_staff', 'ict_admin', 'super_admin']
 
 // ── In-memory rate limiter ───────────────────────────────────────────────────
 
+// TEMPORARILY COMMENTED OUT FOR DEBUGGING
+/*
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
 
 function getRateLimitKey(req: NextRequest): string {
@@ -58,6 +60,7 @@ function pruneRateLimitStore() {
     if (now > entry.resetAt) rateLimitStore.delete(key)
   }
 }
+*/
 
 // ── middleware ───────────────────────────────────────────────────────────────
 
@@ -65,7 +68,7 @@ export async function middleware(request: NextRequest) {
   try {
     const { pathname, searchParams } = request.nextUrl
 
-    if (Math.random() < 0.01) pruneRateLimitStore()
+    // if (Math.random() < 0.01) pruneRateLimitStore()
 
     const isPrefetch =
       request.headers.get('purpose') === 'prefetch' ||
@@ -76,6 +79,7 @@ export async function middleware(request: NextRequest) {
     const isDataRequest = pathname.startsWith('/_next/data') || request.headers.has('x-nextjs-data')
     const isInternal = isPrefetch || isRSC || isDataRequest
 
+    /*
     if (!isInternal) {
       const isAuthRoute = pathname.startsWith('/auth')
       const rateLimitKey = getRateLimitKey(request)
@@ -102,6 +106,7 @@ export async function middleware(request: NextRequest) {
         )
       }
     }
+    */
 
     let supabaseResponse = NextResponse.next({
       request: {
@@ -252,13 +257,21 @@ export async function middleware(request: NextRequest) {
     supabaseResponse.headers.set('x-user-email', user.email || '')
 
     return supabaseResponse
-  } catch (err) {
+  } catch (err: any) {
     console.error('middleware Critical Error:', err)
-    return NextResponse.next({ 
-      request: {
-        headers: request.headers,
+    
+    // Return the actual error message to the client so we can read it!
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Middleware caught an internal error',
+        message: err?.message || String(err),
+        stack: err?.stack || 'No stack trace',
+      }),
+      { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json' } 
       }
-    })
+    )
   }
 }
 
