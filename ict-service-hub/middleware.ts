@@ -181,6 +181,8 @@ export async function middleware(request: NextRequest) {
 
     // ── Handle Authenticated Users ────────────────────────────────────────────
     
+    // TEMPORARY TEST: Commented out profile fetching and RBAC to see if DB calls cause the 500 error on Vercel.
+    /*
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, is_active, is_suspended')
@@ -231,6 +233,19 @@ export async function middleware(request: NextRequest) {
       copyCookies(redirectRes)
       return redirectRes
     }
+    */
+    
+    // Fallback logic for when RBAC is commented out
+    if (isAuthPage && pathname !== '/auth/suspended') {
+      const redirectUrl = request.nextUrl.clone()
+      redirectUrl.pathname = '/dashboard'
+      const redirectRes = NextResponse.redirect(redirectUrl)
+      copyCookies(redirectRes)
+      return redirectRes
+    }
+
+    // Mock role for now to prevent headers from crashing
+    const userRole = 'user'
 
     supabaseResponse.headers.set('x-user-id', user.id)
     supabaseResponse.headers.set('x-user-role', userRole)
