@@ -16,6 +16,7 @@ const PUBLIC_ROUTES = [
   '/auth/suspended',
   '/auth/verify',
   '/guest',
+  '/api/test-spam',
 ]
 
 const ADMIN_ROLES = ['ict_staff', 'ict_admin', 'super_admin']
