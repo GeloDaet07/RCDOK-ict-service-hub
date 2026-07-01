@@ -117,6 +117,10 @@ export async function middleware(request: NextRequest) {
           sameSite: c.sameSite,
         })
       })
+      
+      targetResponse.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate, no-cache, post-check=0, pre-check=0')
+      targetResponse.headers.set('Pragma', 'no-cache')
+      targetResponse.headers.set('Expires', '0')
     }
 
     // ── Handle Unauthenticated Users ──────────────────────────────────────────
