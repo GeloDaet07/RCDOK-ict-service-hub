@@ -2,6 +2,8 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { type CreateGuestTicketInput } from '@/lib/validations/schemas'
+import { SpamService } from '@/lib/services/spam.service'
+import { headers } from 'next/headers'
 
 export async function submitGuestTicket(formData: CreateGuestTicketInput) {
   // Use the service role key to securely insert the ticket, bypassing RLS
@@ -13,6 +15,16 @@ export async function submitGuestTicket(formData: CreateGuestTicketInput) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  // Get client IP
+  const hdrs = await headers()
+  const ip = hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1'
+
+  // Anti-spam check
+  const spamCheck = await SpamService.checkTicketSpam(ip)
+  if (spamCheck.block) {
+    throw new Error('Too many tickets created recently. Please wait before submitting another.')
+  }
 
   const { data, error } = await supabase
     .from('tickets')
@@ -31,6 +43,9 @@ export async function submitGuestTicket(formData: CreateGuestTicketInput) {
         event_notes: formData.event_notes,
         external_archive_link: formData.external_archive_link,
         archive_description: formData.archive_description,
+        ip_address: ip,
+        is_spam_flagged: spamCheck.isSpam,
+        spam_reason: spamCheck.reason,
       }
     ])
     .select('ticket_number')

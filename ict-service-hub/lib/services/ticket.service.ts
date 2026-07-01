@@ -1,6 +1,7 @@
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server'
 import { AuditService } from './audit.service'
 import { NotificationService } from './notification.service'
+import { SpamService } from './spam.service'
 import type { CreateTicketInput, UpdateTicketInput, CreateCommentInput } from '@/lib/validations/schemas'
 import type { Profile, Ticket, NotificationType } from '@/types/database'
 import { headers } from 'next/headers'
@@ -45,6 +46,12 @@ export const TicketService = {
   async create(parsedData: CreateTicketInput, user: any, ip: string): Promise<ActionResult<{ ticketId: string; ticketNumber: string }>> {
     const supabase = await createSupabaseServerClient()
     
+    // Anti-spam check
+    const spamCheck = await SpamService.checkTicketSpam(ip, user.id)
+    if (spamCheck.block) {
+      return { success: false, error: 'Too many tickets created recently. Please wait before submitting another.' }
+    }
+
     const { data: ticketData, error: insertError } = await (supabase.from('tickets') as any)
       .insert({
         requester_id:          user.id,
@@ -60,6 +67,8 @@ export const TicketService = {
         archive_description:   parsedData.archive_description   || null,
         ip_address:            ip,
         status:                'pending',
+        is_spam_flagged:       spamCheck.isSpam,
+        spam_reason:           spamCheck.reason,
       })
       .select('id, ticket_number')
       .single()
