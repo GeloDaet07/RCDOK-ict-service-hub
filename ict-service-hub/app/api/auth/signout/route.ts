@@ -1,17 +1,18 @@
 // app/api/auth/signout/route.ts
 
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export async function GET() {
   const supabase = await createSupabaseServerClient()
-  
-  // Sign out from Supabase - this will also trigger setAll in createSupabaseServerClient
-  // which will update the cookie store.
   await supabase.auth.signOut()
-  
-  // Force redirect to login page with no extra params
-  return NextResponse.redirect(new URL('/auth/login', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'), {
-    status: 302,
-  })
+
+  // Derive origin from the actual incoming request — works on localhost AND Vercel
+  const headersList = await headers()
+  const host = headersList.get('host') ?? 'localhost:3000'
+  const proto = headersList.get('x-forwarded-proto') ?? 'http'
+  const origin = `${proto}://${host}`
+
+  return NextResponse.redirect(new URL('/auth/login', origin), { status: 302 })
 }
