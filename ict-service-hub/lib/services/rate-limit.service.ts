@@ -6,13 +6,13 @@ const redis = Redis.fromEnv();
 
 const authRateLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(60, "1 m"),
+  limiter: Ratelimit.slidingWindow(15, "1 m"),
   analytics: false,
 });
 
 const defaultRateLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(300, "1 m"),
+  limiter: Ratelimit.slidingWindow(60, "1 m"),
   analytics: false,
 });
 
