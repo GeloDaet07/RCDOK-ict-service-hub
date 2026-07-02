@@ -34,6 +34,15 @@ export function GuestTicketSubmitForm() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [ticketNumber, setTicketNumber] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (ticketNumber) {
+      navigator.clipboard.writeText(ticketNumber)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   const {
     register,
@@ -75,14 +84,22 @@ export function GuestTicketSubmitForm() {
             Request Submitted Successfully
           </h2>
           {ticketNumber && (
-            <div className="inline-flex items-center gap-2 bg-brand-950 text-white px-4 py-2 rounded-btn text-sm font-mono font-bold mb-4">
-              <span aria-hidden="true">🎟</span>
-              {ticketNumber}
-            </div>
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="inline-flex items-center gap-2 bg-brand-950 text-white px-4 py-2 rounded-btn text-sm font-mono font-bold mb-4 hover:bg-brand-900 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-300"
+              title="Click to copy ticket number"
+            >
+              <span aria-hidden="true" className="select-none">🎟</span>
+              <span>{ticketNumber}</span>
+              <span className="ml-2" aria-hidden="true">{copied ? '✅' : '📋'}</span>
+            </button>
           )}
-          <p className="text-slate-600 text-base max-w-md mx-auto mb-6">
-            Your request has been received. Our ICT team will review and respond as soon as possible.
-            Please save your tracking number above to check the status of your request later.
+          <p className="text-slate-600 text-base max-w-md mx-auto mb-6 flex flex-col gap-2">
+            <span>Your request has been received. Our ICT team will review and respond as soon as possible.</span>
+            <strong className="text-brand-900 font-bold bg-brand-50 p-2 rounded border border-brand-100">
+              Please save your tracking number above to check the status of your request later.
+            </strong>
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
