@@ -10,11 +10,13 @@ export const dynamic = 'force-dynamic'
 async function handleSignOut() {
   const supabase = await createSupabaseServerClient()
   
+  // Check if a user's session exists before signing out
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
     await supabase.auth.signOut()
   }
 
+  // Clear cached Server Components/layouts
   revalidatePath('/', 'layout')
 
   // Derive origin from the actual incoming request — works on localhost AND Vercel
@@ -25,6 +27,7 @@ async function handleSignOut() {
 
   const response = NextResponse.redirect(new URL('/auth/login', origin), { status: 302 })
   
+  // Prevent caching of this redirect response
   response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate, no-cache, post-check=0, pre-check=0')
   response.headers.set('Pragma', 'no-cache')
   response.headers.set('Expires', '0')

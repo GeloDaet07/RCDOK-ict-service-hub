@@ -17,12 +17,12 @@ const defaultRateLimiter = new Ratelimit({
 });
 
 export const RateLimitService = {
-  getRateLimitKey(req: NextRequest): string {
+  getRateLimitKey(req: NextRequest, isAuthRoute: boolean): string {
     const ip =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       req.headers.get('x-real-ip') ||
       '127.0.0.1'
-    return `rl:${ip}`
+    return `rl:${isAuthRoute ? 'auth' : 'default'}:${ip}`
   },
 
   async checkRateLimit(req: NextRequest, isAuthRoute: boolean) {
@@ -31,7 +31,7 @@ export const RateLimitService = {
       return { success: true, reset: 0 };
     }
 
-    const key = this.getRateLimitKey(req);
+    const key = this.getRateLimitKey(req, isAuthRoute);
     const limiter = isAuthRoute ? authRateLimiter : defaultRateLimiter;
     
     return await limiter.limit(key);

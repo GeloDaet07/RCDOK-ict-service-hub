@@ -47,7 +47,7 @@ export const TicketService = {
     const supabase = await createSupabaseServerClient()
     
     // Anti-spam check
-    const spamCheck = await SpamService.checkTicketSpam(ip, user.id)
+    const spamCheck = await SpamService.checkTicketSpam(ip, user.id, user.email)
     if (spamCheck.block) {
       return { success: false, error: 'Too many tickets created recently. Please wait before submitting another.' }
     }

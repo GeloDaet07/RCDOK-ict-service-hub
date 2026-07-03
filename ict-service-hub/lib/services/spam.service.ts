@@ -15,7 +15,7 @@ export const SpamService = {
    * - Flags as spam if user creates 3-5 tickets
    * - Flags as spam if IP creates 5-8 tickets
    */
-  async checkTicketSpam(ip: string, userId?: string | null): Promise<SpamCheckResult> {
+  async checkTicketSpam(ip: string, userId?: string | null, userEmail?: string | null): Promise<SpamCheckResult> {
     const adminClient = createSupabaseAdminClient()
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
 
@@ -30,7 +30,7 @@ export const SpamService = {
     const totalIpCount = ipCount || 0
 
     if (totalIpCount >= 8) {
-      await this.recordSpamAttempt(ip, userId, 'Exceeded max 8 tickets per IP per hour')
+      await this.recordSpamAttempt(ip, userId, userEmail, 'Exceeded max 8 tickets per IP per hour')
       return { isSpam: true, block: true, reason: 'Exceeded max 8 tickets per IP per hour' }
     }
 
@@ -46,7 +46,7 @@ export const SpamService = {
       totalUserCount = userCount || 0
 
       if (totalUserCount >= 5) {
-        await this.recordSpamAttempt(ip, userId, 'Exceeded max 5 tickets per user per hour')
+        await this.recordSpamAttempt(ip, userId, userEmail, 'Exceeded max 5 tickets per user per hour')
         return { isSpam: true, block: true, reason: 'Exceeded max 5 tickets per user per hour' }
       }
     }
@@ -61,12 +61,12 @@ export const SpamService = {
     return { isSpam: false, block: false, reason: null }
   },
 
-  async recordSpamAttempt(ip: string, userId: string | null | undefined, reason: string) {
+  async recordSpamAttempt(ip: string, userId: string | null | undefined, userEmail: string | null | undefined, reason: string) {
     const adminClient = createSupabaseAdminClient()
 
     await AuditService.logAction({
       actorId: userId || null,
-      actorEmail: null,
+      actorEmail: userEmail || null,
       action: 'spam_flagged',
       resource: 'ticket_creation',
       newValues: { reason },

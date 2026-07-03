@@ -21,7 +21,7 @@ export async function submitGuestTicket(formData: CreateGuestTicketInput) {
   const ip = hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1'
 
   // Anti-spam check
-  const spamCheck = await SpamService.checkTicketSpam(ip)
+  const spamCheck = await SpamService.checkTicketSpam(ip, null, formData.guest_email)
   if (spamCheck.block) {
     throw new Error('Too many tickets created recently. Please wait before submitting another.')
   }

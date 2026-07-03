@@ -118,6 +118,7 @@ export async function middleware(request: NextRequest) {
         })
       })
       
+      // Prevent browser and CDN caching of redirects
       targetResponse.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate, no-cache, post-check=0, pre-check=0')
       targetResponse.headers.set('Pragma', 'no-cache')
       targetResponse.headers.set('Expires', '0')
@@ -148,12 +149,7 @@ export async function middleware(request: NextRequest) {
 
     // 1. Handle Inactive/Suspended Accounts
     if (!profile || !profile.is_active || profile.is_suspended) {
-      if (pathname === '/auth/suspended') {
-        supabaseResponse.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate, no-cache, post-check=0, pre-check=0')
-        supabaseResponse.headers.set('Pragma', 'no-cache')
-        supabaseResponse.headers.set('Expires', '0')
-        return supabaseResponse
-      }
+      if (pathname === '/auth/suspended') return supabaseResponse
       
       const suspendedUrl = request.nextUrl.clone()
       suspendedUrl.pathname = '/auth/suspended'

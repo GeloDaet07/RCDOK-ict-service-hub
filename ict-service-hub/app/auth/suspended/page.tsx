@@ -1,35 +1,7 @@
 // app/auth/suspended/page.tsx
-'use client'
-
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 export default function SuspendedPage() {
-  const [signingOut, setSigningOut] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function signOutSuspendedUser() {
-      try {
-        await fetch('/api/auth/signout', {
-          method: 'POST',
-          credentials: 'include',
-        })
-      } catch (err) {
-        console.error('Error signing out suspended user:', err)
-      } finally {
-        if (!cancelled) setSigningOut(false)
-      }
-    }
-
-    signOutSuspendedUser()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
   return (
     <div className="min-h-screen bg-liturgical-white flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center bg-white rounded-card border border-red-200 shadow-card p-10">
@@ -41,13 +13,9 @@ export default function SuspendedPage() {
         <div className="text-sm text-slate-500 mb-6 space-y-1">
           <p>📧 <a href="mailto:ict@dioceseofkalookan.org" className="text-gold-600 hover:underline">ict@dioceseofkalookan.org</a></p>
         </div>
-        {signingOut ? (
-          <p className="text-xs text-slate-400 mb-4">Signing you out…</p>
-        ) : (
-          <Link href="/auth/login" className="text-sm text-navy-950 hover:text-gold-600 underline">
-            Back to Sign In
-          </Link>
-        )}
+        <Link href="/auth/login" className="text-sm text-navy-950 hover:text-gold-600 underline">
+          Back to Sign In
+        </Link>
       </div>
     </div>
   )

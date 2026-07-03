@@ -15,52 +15,20 @@ const sanitizedString = (min: number, max: number, label: string) =>
         .replace(/<[^>]*>/g, '')
     )
 
-// Helper so it accepts both http and https
-// also accepts direct links without the protocol 
-// ex: just 'drive.google.com' etc
-// auto add protocol to make it a valid link afterwards
-
-const ALLOWED_ARCHIVE_HOSTS = [
-  'drive.google.com',
-  'docs.google.com',
-  'onedrive.live.com',
-  '1drv.ms',
-  'dropbox.com',
-  'www.dropbox.com',
-  'sharepoint.com',
-]
-
-const normalizeUrl = (val: string) => {
-  const trimmed = val.trim()
-  if (!trimmed) return trimmed
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
-}
-
-const isAllowedHost = (hostname: string) =>
-  ALLOWED_ARCHIVE_HOSTS.some(
-    (host) => hostname === host || hostname.endsWith(`.${host}`)
-  )
-
 const externalLinkSchema = z
   .string()
-  .transform(normalizeUrl)
-  .refine((val) => {
-    try {
-      // eslint-disable-next-line no-new
-      new URL(val)
-      return true
-    } catch {
-      return false
-    }
-  }, 'Please enter a valid link (e.g. drive.google.com/... or https://drive.google.com/...)')
-  .refine((val) => {
-    try {
-      const { hostname, protocol } = new URL(val)
-      return (protocol === 'http:' || protocol === 'https:') && isAllowedHost(hostname)
-    } catch {
-      return false
-    }
-  }, 'Only Google Drive, OneDrive, Dropbox, or SharePoint links are allowed.')
+  .url('Please enter a valid URL (e.g. https://drive.google.com/...)')
+  .refine(
+    (url) =>
+      url.startsWith('https://drive.google.com') ||
+      url.startsWith('https://onedrive.live.com') ||
+      url.startsWith('https://1drv.ms') ||
+      url.startsWith('https://www.dropbox.com') ||
+      url.startsWith('https://dropbox.com') ||
+      url.startsWith('https://sharepoint.com') ||
+      url.startsWith('https://docs.google.com'),
+    'Only Google Drive, OneDrive, Dropbox, or SharePoint links are allowed.'
+  )
   .optional()
   .or(z.literal(''))
 
