@@ -13,12 +13,13 @@
 2. [Project Structure](#2-project-structure)
 3. [Backend Setup — Supabase](#3-backend-setup--supabase)
 4. [Email Setup — Resend](#4-email-setup--resend)
-5. [Frontend Setup — Local Development](#5-frontend-setup--local-development)
-6. [Role & User Setup](#6-role--user-setup)
-7. [Deployment — Vercel](#7-deployment--vercel)
-8. [Post-Deployment Checklist](#8-post-deployment-checklist)
-9. [Maintenance & Free-Tier Tips](#9-maintenance--free-tier-tips)
-10. [Troubleshooting](#10-troubleshooting)
+5. [Rate Limiting Setup — Upstash](#5-rate-limiting-setup--upstash)
+6. [Frontend Setup — Local Development](#6-frontend-setup--local-development)
+7. [Role & User Setup](#7-role--user-setup)
+8. [Deployment — Vercel](#8-deployment--vercel)
+9. [Post-Deployment Checklist](#9-post-deployment-checklist)
+10. [Maintenance & Free-Tier Tips](#10-maintenance--free-tier-tips)
+11. [Troubleshooting](#11-troubleshooting)
 
 ---
 
@@ -40,6 +41,7 @@ Before starting, ensure you have the following installed and accounts ready:
 | **Vercel** | Hosting | https://vercel.com |
 | **Resend** | Email notifications | https://resend.com |
 | **GitHub** | Code repository | https://github.com |
+| **Upstash** | Rate limits | https://upstash.com/ |
 
 > **Domain:** You will need a domain for Resend email sending (e.g., `dioceseofkalookan.org`). If you don't have one yet, you can use Resend's sandbox mode during development.
 
@@ -238,9 +240,35 @@ This is already in the schema (the `handle_new_user` trigger), but confirm it ex
 
 ---
 
-## 5. Frontend Setup — Local Development
+## 5. Rate Limiting Setup — Upstash
 
-### Step 5.1 — Clone and Install
+### Step 5.1 — Create a Upstash Account
+
+1. Go to **https://upstash.com** and sign in (or create a free account)
+2. Choose Free Plan
+
+### Step 5.2 — Create database in Upstash Redis
+
+1. Once logged in navigate to the **Redis** section.
+2. Click on the **Create Database** button.
+3. Fill in the details:
+ - **Name**: `ict-service-hub`
+ - **Type**: Choose "ap-southeast-1" server
+ - **Eviction**: Toggle it to 'on'.
+4. Click **Create**.
+
+### Step 5.3 — Get Upstash Redis API keys
+
+1. In the details page, head over to the "Connect" section
+2. Copy the following API keys for you to use in your environmental variables later on:
+ - **UPSTASH_REDIS_REST_URL**
+ - **UPSTASH_REDIS_REST_TOKEN**
+
+---
+
+## 6. Frontend Setup — Local Development
+
+### Step 6.1 — Clone and Install
 
 ```bash
 # Clone the repository
@@ -251,7 +279,7 @@ cd ict-service-hub
 npm install
 ```
 
-### Step 5.2 — Configure Environment Variables
+### Step 6.2 — Configure Environment Variables
 
 ```bash
 # Copy the example environment file
@@ -269,11 +297,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 RESEND_API_KEY=re_your_resend_key_here
 ICT_ADMIN_EMAIL=ict@dioceseofkalookan.org
+
+UPSTASH_REDIS_REST_URL=your-upstash-redis-rest-url
+UPSTASH_REDIS_REST_TOKEN=your-upstash-redis-rest-token
 ```
 
 > **Security:** Never commit `.env.local` to Git. It's already in `.gitignore`.
 
-### Step 5.3 — Start Development Server
+### Step 6.3 — Start Development Server
 
 ```bash
 npm run dev
@@ -281,7 +312,7 @@ npm run dev
 
 Visit **http://localhost:3000** — you should see the landing page.
 
-### Step 5.4 — Verify the Setup
+### Step 6.4 — Verify the Setup
 
 1. Go to `http://localhost:3000/auth/signup`
 2. Create a test account
@@ -291,9 +322,9 @@ Visit **http://localhost:3000** — you should see the landing page.
 
 ---
 
-## 6. Role & User Setup
+## 7. Role & User Setup
 
-### Step 6.1 — Create the Super Admin Account
+### Step 7.1 — Create the Super Admin Account
 
 1. First, sign up through the app: `http://localhost:3000/auth/signup`
 2. Use the ICT admin's real email address
@@ -308,7 +339,7 @@ SET role = 'super_admin'
 WHERE email = 'ict-admin@dioceseofkalookan.org';
 ```
 
-### Step 6.2 — Create ICT Staff Accounts
+### Step 7.2 — Create ICT Staff Accounts
 
 Option A — Staff signs up themselves, then admin promotes them:
 
@@ -329,7 +360,7 @@ Option B — Use the Admin Portal (once deployed):
 2. Go to `/admin/users`
 3. Find the user and change their role via the UI
 
-### Step 6.3 — Understanding Roles
+### Step 7.3 — Understanding Roles
 
 | Role | Access | Description |
 |------|--------|-------------|
@@ -342,9 +373,9 @@ Option B — Use the Admin Portal (once deployed):
 
 ---
 
-## 7. Deployment — Vercel
+## 8. Deployment — Vercel
 
-### Step 7.1 — Push to GitHub
+### Step 8.1 — Push to GitHub
 
 ```bash
 # Initialize git (if not already done)
@@ -357,7 +388,7 @@ git remote add origin https://github.com/your-org/ict-service-hub.git
 git push -u origin main
 ```
 
-### Step 7.2 — Connect to Vercel
+### Step 8.2 — Connect to Vercel
 
 1. Go to **https://vercel.com** and sign in with GitHub
 2. Click **"New Project"**
@@ -365,7 +396,7 @@ git push -u origin main
 4. Vercel will auto-detect Next.js — click **"Deploy"**
 5. The first deploy will fail (no env vars yet) — that's okay
 
-### Step 7.3 — Add Environment Variables in Vercel
+### Step 8.3 — Add Environment Variables in Vercel
 
 1. In your Vercel project, go to **Settings → Environment Variables**
 2. Add each variable from your `.env.local`:
@@ -378,10 +409,12 @@ git push -u origin main
 | `NEXT_PUBLIC_APP_URL` | Production: your domain; Preview: auto |
 | `RESEND_API_KEY` | Production, Preview |
 | `ICT_ADMIN_EMAIL` | Production |
+| `UPSTASH_REDIS_REST_URL` | Production, Preview, Development |
+| `UPSTASH_REDIS_REST_TOKEN` | Production, Preview, Development |
 
 3. After adding all variables, click **"Redeploy"** → **"Redeploy"** (no cache)
 
-### Step 7.4 — Configure Custom Domain (optional)
+### Step 8.4 — Configure Custom Domain (optional)
 
 1. In Vercel → **Settings → Domains**
 2. Add your domain: `ict.dioceseofkalookan.org`
@@ -390,7 +423,7 @@ git push -u origin main
 5. Update `NEXT_PUBLIC_APP_URL` in Vercel to `https://ict.dioceseofkalookan.org`
 6. Update Supabase Auth → Settings → Site URL to match
 
-### Step 7.5 — Update Supabase for Production
+### Step 8.5 — Update Supabase for Production
 
 1. In Supabase → **Authentication → URL Configuration**
 2. Update **Site URL** to your production URL
@@ -402,7 +435,7 @@ git push -u origin main
 
 ---
 
-## 8. Post-Deployment Checklist
+## 9. Post-Deployment Checklist
 
 Run through this checklist after every deployment:
 
@@ -434,7 +467,7 @@ Run through this checklist after every deployment:
 
 ---
 
-## 9. Maintenance & Free-Tier Tips
+## 10. Maintenance & Free-Tier Tips
 
 ### Monthly Maintenance Tasks
 
@@ -461,6 +494,14 @@ SELECT * FROM tickets
 WHERE status IN ('closed', 'cancelled')
 AND closed_at < NOW() - INTERVAL '1 year';
 ```
+
+### Upstash Free Tier Limits
+
+| Resource | Limit | Our Usage |
+|----------|-------|-----------|
+| Requests | 500,000 commands/month | Minimal for rate limiting |
+| Bandwidth | 50 MB/month | Very small payloads |
+| Storage | 256 MB | Temporary IP blocks |
 
 ### Supabase Free Tier Limits
 
@@ -490,7 +531,7 @@ AND closed_at < NOW() - INTERVAL '1 year';
 
 ---
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 ### "Invalid login credentials"
 - Check that the user confirmed their email
@@ -522,10 +563,11 @@ AND closed_at < NOW() - INTERVAL '1 year';
 - During development, use Resend sandbox (emails only go to your account email)
 
 ### "Too many requests" error
-- The rate limiter is working correctly
+- The rate limiter via Upstash is working correctly
 - Users are limited to 60 requests/minute, auth routes to 15/minute
 - Wait 60 seconds and try again
 - For legitimate high-volume use, increase limits in `middleware.ts`
+- Ensure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set correctly in your environment variables.
 
 ### Database errors on first deploy
 - Ensure the full `schema.sql` was run in Supabase SQL Editor
@@ -552,6 +594,7 @@ Email: ict@dioceseofkalookan.org
 - [Tailwind CSS](https://tailwindcss.com)
 - [Resend](https://resend.com)
 - [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev)
+- [Upstash](https://upstash.com)
 
 ---
 
