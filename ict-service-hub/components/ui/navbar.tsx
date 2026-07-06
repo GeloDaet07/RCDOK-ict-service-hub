@@ -28,12 +28,12 @@ const REQUESTER_NAV = [
   { href: "/notifications", label: "Notifications", icon: "🔔" },
 ];
 
-const ADMIN_NAV = [
+const ADMIN_NAV: { href: string; label: string; icon: string; allowedRoles?: UserRole[] }[] = [
   { href: "/admin", label: "Dashboard", icon: "🏠" },
   { href: "/admin/tickets", label: "Tickets", icon: "📋" },
-  { href: "/admin/users", label: "Users", icon: "👥" },
-  { href: "/admin/audit", label: "Audit Logs", icon: "📜" },
-  { href: "/admin/spam", label: "Spam", icon: "ℹ️" },
+  { href: "/admin/users", label: "Users", icon: "👥", allowedRoles: ["ict_admin", "super_admin"] },
+  { href: "/admin/audit", label: "Audit Logs", icon: "📜", allowedRoles: ["ict_admin", "super_admin"] },
+  { href: "/admin/spam", label: "Spam", icon: "ℹ️", allowedRoles: ["ict_admin", "super_admin"] },
 ];
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
@@ -140,12 +140,12 @@ export default function Navbar({ profile, unreadCount = 0 }: NavbarProps) {
                   <div className={styles.adminBrandLabel}>Diocese of Kalookan</div>
                   <div className={styles.adminBrandTitle}>ICT Service Hub</div>
                 </div>
-                <span className={styles.adminBadge}>Admin Portal</span>
+                <span className={styles.adminBadge}>{profile.role === 'ict_staff' ? 'Staff Portal' : 'Admin Portal'}</span>
               </div>
 
               {/* Desktop nav */}
               <nav className={styles.adminNav}>
-                {ADMIN_NAV.map(({ href, label }) => {
+                {ADMIN_NAV.filter(item => !item.allowedRoles || item.allowedRoles.includes(profile.role)).map(({ href, label }) => {
                   const active = isActive(href);
                   return (
                     <Link key={href} href={href} prefetch={false} aria-current={active ? "page" : undefined}
@@ -191,12 +191,12 @@ export default function Navbar({ profile, unreadCount = 0 }: NavbarProps) {
           <div className="px-5 py-4 border-b border-slate-800">
             <p className="text-sm font-semibold text-white">{profile.full_name}</p>
             <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full bg-amber-600/20 text-amber-400 text-xs font-bold border border-amber-600/30">
-              Admin Portal
+              {profile.role === 'ict_staff' ? 'Staff Portal' : 'Admin Portal'}
             </span>
           </div>
 
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {ADMIN_NAV.map(({ href, label, icon }) => {
+            {ADMIN_NAV.filter(item => !item.allowedRoles || item.allowedRoles.includes(profile.role)).map(({ href, label, icon }) => {
               const active = isActive(href);
               return (
                 <Link key={href} href={href} prefetch={false} aria-current={active ? "page" : undefined}

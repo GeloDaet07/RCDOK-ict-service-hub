@@ -77,7 +77,7 @@ export default async function SpamPage() {
           <ul className="text-sm text-amber-800 space-y-1">
             <li>• Max <strong>5 tickets per user</strong> per hour</li>
             <li>• Max <strong>8 tickets per IP address</strong> per hour</li>
-            <li>• Max <strong>60 requests per minute</strong> per IP (all routes)</li>
+            <li>• Max <strong>180 requests per minute</strong> per IP (all routes)</li>
             <li>• Max <strong>15 auth requests per minute</strong> per IP (login/signup)</li>
           </ul>
         </div>

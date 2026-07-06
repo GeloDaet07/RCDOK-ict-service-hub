@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
     if (!isInternal) {
       const isAuthRoute = pathname.startsWith('/auth')
-      const limit = isAuthRoute ? 15 : 60
+      const limit = isAuthRoute ? 15 : 180
 
       const rateLimitResult = await RateLimitService.checkRateLimit(request, isAuthRoute)
 

@@ -12,7 +12,7 @@ const authRateLimiter = new Ratelimit({
 
 const defaultRateLimiter = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(60, "1 m"),
+  limiter: Ratelimit.slidingWindow(180, "1 m"),
   analytics: false,
 });
 
