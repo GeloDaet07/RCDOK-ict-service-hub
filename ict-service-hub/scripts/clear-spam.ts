@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { loadEnvConfig } from '@next/env'
+import envPkg from '@next/env'
+const { loadEnvConfig } = envPkg
 import path from 'path'
 
 const projectDir = process.cwd()

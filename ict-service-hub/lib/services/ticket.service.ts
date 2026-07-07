@@ -2,6 +2,7 @@ import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/sup
 import { AuditService } from './audit.service'
 import { NotificationService } from './notification.service'
 import { SpamService } from './spam.service'
+import { EmailService } from './email.service'
 import type { CreateTicketInput, UpdateTicketInput, CreateCommentInput } from '@/lib/validations/schemas'
 import type { Profile, Ticket, NotificationType } from '@/types/database'
 import { headers } from 'next/headers'
@@ -97,6 +98,10 @@ export const TicketService = {
       ipAddress: ip
     })
 
+    const requesterName = user.user_metadata?.full_name || 'User'
+    await EmailService.sendTicketCreatedEmail(user.email, ticket.ticket_number, parsedData.title, requesterName)
+    await EmailService.sendAdminAlertEmail(ticket.ticket_number, parsedData.title, parsedData.category, requesterName)
+
     return { success: true, data: { ticketId: ticket.id, ticketNumber: ticket.ticket_number } }
   },
 
@@ -104,11 +109,11 @@ export const TicketService = {
     const supabase = await createSupabaseServerClient()
 
     const { data: existingData } = await (supabase.from('tickets') as any)
-      .select('id, status, assigned_to, requester_id, ticket_number, resolved_at, closed_at')
+      .select('id, status, assigned_to, requester_id, ticket_number, resolved_at, closed_at, title')
       .eq('id', ticketId)
       .single()
 
-    const existing = existingData as Pick<Ticket, 'id' | 'status' | 'assigned_to' | 'requester_id' | 'ticket_number' | 'resolved_at' | 'closed_at'> | null
+    const existing = existingData as Pick<Ticket, 'id' | 'status' | 'assigned_to' | 'requester_id' | 'ticket_number' | 'resolved_at' | 'closed_at' | 'title'> | null
     if (!existing) return { success: false, error: 'Ticket not found.' }
 
     const updateData: Partial<Ticket> = Object.fromEntries(
@@ -148,6 +153,18 @@ export const TicketService = {
           title: 'Ticket Status Updated',
           message: `Your ticket ${existing.ticket_number} status has been updated to "${statusLabel}".`
         })
+
+        const { data: reqProfileData } = await (supabase.from('profiles') as any).select('email, full_name').eq('id', existing.requester_id).single()
+        const reqProfile = reqProfileData as { email: string; full_name: string } | null
+        if (reqProfile?.email) {
+          await EmailService.sendTicketStatusUpdateEmail(
+            reqProfile.email,
+            existing.ticket_number,
+            existing.title || 'Your Ticket',
+            parsedData.status,
+            reqProfile.full_name || 'User'
+          )
+        }
       }
     }
 
