@@ -214,8 +214,8 @@ export default async function AdminTicketDetailPage({ params }: { params: Promis
                     <div key={h.id} className="flex items-start gap-2 text-xs">
                       <div className="h-1.5 w-1.5 rounded-full bg-slate-300 mt-1.5 flex-shrink-0" />
                       <div>
-                        <span className="text-slate-500">{h.old_status ? `${h.old_status} →` : 'Created as'} </span>
-                        <span className="font-semibold text-slate-800">{h.new_status}</span>
+                        <span className="text-slate-500 capitalize">{h.old_status ? `${h.old_status.replace(/_/g, ' ')} →` : 'Created as'} </span>
+                        <span className="font-semibold text-slate-800 capitalize">{h.new_status.replace(/_/g, ' ')}</span>
                         <div className="text-slate-400">{new Date(h.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                       </div>
                     </div>

@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "db:types": "supabase gen types typescript --local > types/supabase-generated.ts"
+    "db:types": "supabase gen types typescript --local > types/supabase-generated.ts",
+    "test": "jest"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.15",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.10.2",
     "@types/nprogress": "^0.2.3",
     "@types/react": "^19.0.2",
@@ -38,7 +40,10 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.17.0",
     "eslint-config-next": "^16.2.6",
+    "jest": "^30.4.2",
     "postcss": "^8.4.49",
+    "ts-jest": "^29.4.11",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   }
 }

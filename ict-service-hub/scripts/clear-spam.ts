@@ -16,7 +16,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function clearSpam() {
-  console.log("🧹 Sweeping up spam tickets...")
+  console.log("Removing all spam tickets...")
   
   // Delete all tickets that are flagged as spam
   const { data, error, count } = await supabase
@@ -25,11 +25,11 @@ async function clearSpam() {
     .eq('is_spam_flagged', true)
   
   if (error) {
-    console.error("❌ Failed to delete spam tickets:", error.message)
+    console.error("Failed to delete spam tickets:", error.message)
     process.exit(1)
   }
   
-  console.log(`✅ Successfully deleted ${count} spam ticket(s)!`)
+  console.log(`Successfully deleted ${count} spam ticket(s)!`)
 }
 
 clearSpam()

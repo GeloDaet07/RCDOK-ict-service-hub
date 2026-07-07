@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { Search, Loader2, Package, Clock, CheckCircle2, AlertCircle, Calendar, MessageSquare, Send } from 'lucide-react'
+import { Search, Loader2, Ticket, Clock, CheckCircle2, AlertCircle, Calendar, MessageSquare, Send } from 'lucide-react'
 import { addGuestComment } from './actions'
 
 type TicketStatus = 'pending' | 'open' | 'in_progress' | 'on_hold' | 'resolved' | 'closed' | 'cancelled'
@@ -139,7 +139,7 @@ export default function GuestTrackTicket() {
       {/* Search Bar */}
       <div className="max-w-xl mx-auto mb-12">
         <form onSubmit={handleSearch} className="relative flex items-center">
-          <Package className="absolute left-4 w-5 h-5 text-slate-400" />
+          <Ticket className="absolute left-4 w-5 h-5 text-slate-400" />
           <input
             type="text"
             value={ticketNumber}
