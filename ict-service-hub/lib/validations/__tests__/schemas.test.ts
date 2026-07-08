@@ -268,6 +268,18 @@ describe('Validation Schemas', () => {
         expect(result.error.issues[0].message).toBe('Password must contain at least one uppercase letter.');
       }
     });
+
+    it('accepts passwords longer than 72 characters', () => {
+      const longPassword = 'A1' + 'a'.repeat(80);
+      const validData = {
+        full_name: 'John Doe',
+        email: 'john@example.com',
+        password: longPassword,
+        confirm_password: longPassword,
+      };
+      const result = signupSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
   });
 
   describe('resetPasswordSchema', () => {

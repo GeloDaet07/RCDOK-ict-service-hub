@@ -84,7 +84,7 @@ export default async function AdminUsersPage({
         </div>
 
         {/* Search */}
-        <form method="GET" className="mb-4 flex gap-2">
+        <form key={JSON.stringify(params)} method="GET" className="mb-4 flex gap-2">
           <input
             name="q"
             defaultValue={params.q}
