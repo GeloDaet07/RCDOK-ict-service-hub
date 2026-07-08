@@ -25,7 +25,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string; q?: string }>
+  searchParams: Promise<{ role?: string; q?: string; suspended?: string }>
   
 }) {
   const params = await searchParams
@@ -41,20 +41,28 @@ export default async function AdminUsersPage({
   if (!['ict_admin', 'super_admin'].includes(profile.role)) redirect('/admin')
 
   const adminClient = createSupabaseAdminClient()
+  
   let query = adminClient.from('profiles').select('*').order('created_at', { ascending: false })
-  if (params.role) query = query.eq('role', params.role)
-  if (params.q)    query = query.ilike('full_name', `%${params.q}%`)
+  if (params.q) query = query.ilike('full_name', `%${params.q}%`)
 
-  const { data: usersData } = await query
-  const users = (usersData || []) as Profile[]
+  const { data: allUsersData } = await query
+  const allUsers = (allUsersData || []) as Profile[]
 
   const counts = {
-    all:         users.length,
-    requester:   users.filter((u) => u.role === 'requester').length,
-    ict_staff:   users.filter((u) => u.role === 'ict_staff').length,
-    ict_admin:   users.filter((u) => u.role === 'ict_admin').length,
-    super_admin: users.filter((u) => u.role === 'super_admin').length,
-    suspended:   users.filter((u) => u.is_suspended).length,
+    all:         allUsers.length,
+    requester:   allUsers.filter((u) => u.role === 'requester').length,
+    ict_staff:   allUsers.filter((u) => u.role === 'ict_staff').length,
+    ict_admin:   allUsers.filter((u) => u.role === 'ict_admin').length,
+    super_admin: allUsers.filter((u) => u.role === 'super_admin').length,
+    suspended:   allUsers.filter((u) => u.is_suspended).length,
+  }
+
+  let users = allUsers
+  if (params.role) {
+    users = users.filter((u) => u.role === params.role)
+  }
+  if (params.suspended === 'true') {
+    users = users.filter((u) => u.is_suspended)
   }
 
   return (
@@ -70,11 +78,11 @@ export default async function AdminUsersPage({
         {/* Role filter tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { label: `All (${counts.all})`,               href: '/admin/users',                  active: !params.role },
+            { label: `All (${counts.all})`,               href: '/admin/users',                  active: !params.role && params.suspended !== 'true' },
             { label: `Requesters (${counts.requester})`,  href: '/admin/users?role=requester',   active: params.role === 'requester' },
             { label: `ICT Staff (${counts.ict_staff})`,   href: '/admin/users?role=ict_staff',   active: params.role === 'ict_staff' },
             { label: `Admins (${counts.ict_admin})`,      href: '/admin/users?role=ict_admin',   active: params.role === 'ict_admin' },
-            { label: `Suspended (${counts.suspended})`,   href: '/admin/users?suspended=true',   active: params.role === 'suspended' },
+            { label: `Suspended (${counts.suspended})`,   href: '/admin/users?suspended=true',   active: params.suspended === 'true' },
           ].map((tab) => (
             <Link key={tab.href} href={tab.href}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${tab.active ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}>
