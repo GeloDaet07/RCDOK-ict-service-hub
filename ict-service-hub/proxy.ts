@@ -23,7 +23,7 @@ const ADMIN_ROLES = ['ict_staff', 'ict_admin', 'super_admin']
 
 // ── middleware ───────────────────────────────────────────────────────────────
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     const { pathname, searchParams } = request.nextUrl
 
