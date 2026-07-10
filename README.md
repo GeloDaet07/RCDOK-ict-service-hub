@@ -70,15 +70,19 @@ ict-service-hub/
 │   │   ├── login/                  # Login page
 │   │   ├── reset-password/         # Reset password page
 │   │   ├── signup/                 # Signup page
-│   │   └── suspended/              # Suspended account page
+│   │   ├── suspended/              # Suspended account page
+│   │   └── layout.tsx              # Auth layout wrapper
 │   ├── guest/                      # Guest portal routes
 │   │   ├── submit-ticket/          # Guest ticket submission
-│   │   └── track-ticket/           # Guest ticket tracking
+│   │   ├── track-ticket/           # Guest ticket tracking
+│   │   └── layout.tsx              # Guest layout wrapper
 │   ├── (user)/                     # User portal routes (requesters)
 │   │   ├── dashboard/              # User dashboard
 │   │   ├── notifications/          # User notifications
-│   │   └── tickets/                # Ticket management
+│   │   ├── tickets/                # Ticket management
+│   │   └── layout.tsx              # User layout wrapper
 │   ├── globals.css                 # Global CSS styles
+│   ├── icon.png                    # App icon
 │   ├── layout.tsx                  # Root layout
 │   └── page.tsx                    # Landing/redirect page
 │
@@ -106,6 +110,7 @@ ict-service-hub/
 │   │   └── resend.ts               # Resend setup
 │   ├── services/                   # Business logic services
 │   │   ├── audit.service.ts        # Audit logging service
+│   │   ├── email.service.ts        # Email sending service
 │   │   ├── notification.service.ts # Notification management service
 │   │   ├── rate-limit.service.ts   # Rate limiting service
 │   │   ├── spam.service.ts         # Spam detection service
@@ -114,9 +119,14 @@ ict-service-hub/
 │   │   ├── client.ts               # Browser-side client
 │   │   └── server.ts               # Server-side client
 │   ├── utility/                    # Utility functions
+│   │   ├── __tests__/              # Utility tests
 │   │   └── crypto.ts               # Cryptography helpers
 │   └── validations/                # Zod validation schemas
+│       ├── __tests__/              # Validation tests
 │       └── schemas.ts              # Zod schemas
+│
+├── public/                         # Public static assets
+│   └── coat-of-arms.png            # Diocese coat of arms
 │
 ├── scripts/                        # Utility scripts
 │   ├── clear-spam.ts               # Script to clear spam data
@@ -129,8 +139,11 @@ ict-service-hub/
 │   ├── css.d.ts                    # CSS Module typings
 │   └── database.ts                 # TypeScript types
 │
-├── middleware.ts                   # RBAC + rate limiting
+├── jest.config.js                  # Jest testing configuration
+├── next.config.ts                  # Next.js configuration
+├── proxy.ts                        # RBAC + rate limiting
 ├── tailwind.config.ts              # Tailwind CSS configuration
+├── tsconfig.json                   # TypeScript configuration
 ├── package.json                    # Dependencies and scripts
 └── .env.example                    # Example environment variables
 ```
