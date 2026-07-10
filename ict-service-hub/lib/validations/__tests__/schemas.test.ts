@@ -5,7 +5,8 @@ import {
   updateTicketSchema,
   loginSchema,
   signupSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
+  forgotPasswordSchema
 } from '../schemas';
 
 describe('Validation Schemas', () => {
@@ -290,6 +291,86 @@ describe('Validation Schemas', () => {
       };
       const result = resetPasswordSchema.safeParse(validData);
       expect(result.success).toBe(true);
+    });
+
+    it('fails when passwords do not match', () => {
+      const invalidData = {
+        password: 'NewPassword123',
+        confirm_password: 'NewPassword124',
+      };
+      const result = resetPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Passwords do not match.');
+      }
+    });
+
+    it('fails when password does not contain a number', () => {
+      const invalidData = {
+        password: 'NewPasswordNoNum',
+        confirm_password: 'NewPasswordNoNum',
+      };
+      const result = resetPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Password must contain at least one number.');
+      }
+    });
+
+    it('fails when password does not contain an uppercase letter', () => {
+      const invalidData = {
+        password: 'newpassword123',
+        confirm_password: 'newpassword123',
+      };
+      const result = resetPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Password must contain at least one uppercase letter.');
+      }
+    });
+
+    it('fails when password is too short', () => {
+      const invalidData = {
+        password: 'A1a',
+        confirm_password: 'A1a',
+      };
+      const result = resetPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Password must be at least 6 characters.');
+      }
+    });
+  });
+
+  describe('forgotPasswordSchema', () => {
+    it('validates a correct email', () => {
+      const validData = {
+        email: 'test@example.com',
+      };
+      const result = forgotPasswordSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+    });
+
+    it('lowercases the email automatically', () => {
+      const validData = {
+        email: 'TEST@EXAMPLE.COM',
+      };
+      const result = forgotPasswordSchema.safeParse(validData);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.email).toBe('test@example.com');
+      }
+    });
+
+    it('fails on invalid email format', () => {
+      const invalidData = {
+        email: 'not-an-email',
+      };
+      const result = forgotPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Please enter a valid email address.');
+      }
     });
   });
 });

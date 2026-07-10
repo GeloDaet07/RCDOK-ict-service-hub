@@ -15,6 +15,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/'
+  const isResetSuccess = searchParams.get('reset') === 'success'
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
@@ -50,6 +51,12 @@ function LoginForm() {
       {serverError && (
         <div className="mb-5">
           <Alert variant="error" onDismiss={() => setServerError(null)}>{serverError}</Alert>
+        </div>
+      )}
+      
+      {isResetSuccess && !serverError && (
+        <div className="mb-5">
+          <Alert variant="success">Your password has been reset successfully. You can now sign in.</Alert>
         </div>
       )}
 
